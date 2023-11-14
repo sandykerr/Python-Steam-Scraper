@@ -8,8 +8,9 @@ import csv
 
 '''
     TO DO: 
-    1) FIND A WAY TO MAKE INFINITE (OR NEAR-INFINITE) SCROLLING WORK (see yt vid)
-    2) AUTOMATE THIS PROCESS
+    1) DO SOMETHING WITH THE DATA (FIND BEST DEALS)
+    2) LOOK AT REVIEWS OF EACH GAME
+    3) AUTOMATE THIS PROCESS
 
 '''
 
@@ -35,22 +36,24 @@ def get_all_games(url):
 
 def create_games_list(games_html):
     games_list = []
-    for game in games_html: 
+    for game in games_html:
         title = game.find('span', {'class' : 'title'}).text
+        gid = game['data-ds-appid'] #game id, will use this for reviews scraping
         
         #all games have this, for discounted games this will be the discounted price
-        print(title)
         try:
             price = game.find('div', {'class' : 'discount_final_price'}).text.strip().split('$') #price of game, after discount if discounted
         except:
             price = ['Free']
-        og_price = game.find('div', {'class' : 'discount_original_price'}) #used for discounted games, price before discount
-       
+        
         #free games don't split the same
         if(price[0] != 'Free'): 
             price = price[1] 
         else:
             price = price[0]
+        
+        #original price before discount
+        og_price = game.find('div', {'class' : 'discount_original_price'})
         
         #og_price only found if game is discounted
         if(og_price == None): 
