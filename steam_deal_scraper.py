@@ -61,7 +61,7 @@ def games_to_csv(games_list):
     
     #write a header representing the date modified; still not working
     filepath = './game_prices.csv'
-    with open(filepath, 'a') as f:
+    with open(filepath, 'w') as f:
         f.write(create_csv_header())
         f.close()
     games_df.to_csv(filepath, index=False, header=False, mode='a')
