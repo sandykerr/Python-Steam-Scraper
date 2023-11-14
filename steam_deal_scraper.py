@@ -8,9 +8,8 @@ import csv
 
 '''
     TO DO: 
-    1) FIX THE HEADER SITUATION IN THE CSV; it's not writing the date and time properly, something about pd.to_csv() is overwriting
-    2) FIND A WAY TO MAKE INFINITE (OR NEAR-INFINITE) SCROLLING WORK (see yt vid)
-    3) AUTOMATE THIS PROCESS
+    1) FIND A WAY TO MAKE INFINITE (OR NEAR-INFINITE) SCROLLING WORK (see yt vid)
+    2) AUTOMATE THIS PROCESS
 
 '''
 
