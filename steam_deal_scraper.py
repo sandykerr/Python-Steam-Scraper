@@ -14,16 +14,24 @@ import csv
 '''
 
 #steam store searching for RPGs
-url2 = 'https://store.steampowered.com/search/results/?query&start=50&count=50&dynamic_data=&force_infinite=1&tags=122&supportedlang=english&filter=topsellers&ndl=1&snr=1_7_7_7000_7&infinite=1'
+url = 'https://store.steampowered.com/search/results/?query&start=50&count=50&dynamic_data=&force_infinite=1&tags=122&supportedlang=english&filter=topsellers&ndl=1&snr=1_7_7_7000_7&infinite=1'
 
-def get_html(url):
+'''
+    FUNCTION THAT RETRIEVES HTML INFO FOR GAME TITLES AND PRICES ON STEAM USING JSON; RETURNS TUPLE OF GAMES LIST AND INT OF TOTAL RESULTS
+'''
+
+def get_all_games(url):
     req = requests.get(url)
-    req_to_json = dict(req.json())
-    soup = bs(req_to_json['results_html'], 'html.parser')
-    
+    req_dict = dict(req.json())
+    soup = bs(req_dict['results_html'], 'html.parser')
     games_html = soup.find_all('a') #list of all games since all are under a tags
+    total_results = req_dict['total_count'] #element of json that indicates total games in infinite scroll
     
-    return games_html
+    return (games_html, total_results)
+
+'''
+    FUNCTION THAT CREATES A LIST OF GAME DICTIONARIES, WITH TITLE, ORIGINAL PRICE, AND DISCOUNTED PRICE
+'''
 
 def create_games_list(games_html):
     games_list = []
@@ -31,8 +39,12 @@ def create_games_list(games_html):
         title = game.find('span', {'class' : 'title'}).text
         
         #all games have this, for discounted games this will be the discounted price
-        price = game.find('div', {'class' : 'discount_final_price'}).text.strip().split('$')
-        og_price = game.find('div', {'class' : 'discount_original_price'})
+        print(title)
+        try:
+            price = game.find('div', {'class' : 'discount_final_price'}).text.strip().split('$') #price of game, after discount if discounted
+        except:
+            price = ['Free']
+        og_price = game.find('div', {'class' : 'discount_original_price'}) #used for discounted games, price before discount
        
         #free games don't split the same
         if(price[0] != 'Free'): 
@@ -40,7 +52,7 @@ def create_games_list(games_html):
         else:
             price = price[0]
         
-        #discounted games have a non-null og_price var
+        #og_price only found if game is discounted
         if(og_price == None): 
             og_price = price
         else:
@@ -55,8 +67,12 @@ def create_games_list(games_html):
         games_list.append(game_dict)
     return games_list
 
+'''
+    FUNCTION TO OUTPUT THE SCRAPED DATA TO A CSV FILE, ADDING DATE AND TIME AT FILE'S HEADER
+'''
+
 def games_to_csv(games_list):
-    games_df = pd.DataFrame(games_list)
+    games_df = pd.concat([pd.DataFrame(g) for g in results])
     #games_df.to_csv('game_prices.csv', index=False)
     
     #write a header representing the date modified; still not working
@@ -69,6 +85,9 @@ def games_to_csv(games_list):
     print('Saved games to CSV')
     return
 
+'''
+    FUNCTION TO ADD A DATETIME STAMP TO THE CSV
+'''
 def create_csv_header():
     #get current date and time
     now = datetime.datetime.now()
@@ -87,8 +106,18 @@ def create_csv_header():
     csv_header = 'Game prices as of: ' + str(year) + '/' + str(month) + '/' + str(day) + ', at ' + str(hrs) + ':' + str(mins) + ':' + str(secs) + '\n'
     return csv_header
 
-games_html = get_html(url2)
-games_list = create_games_list(games_html)
-games_to_csv(games_list)
+#get the total amount of results (games) from get_all_games tuple returned
+total_results = get_all_games(url)[1]
+print(total_results)
+results = []
+
+
+#loop thru all of the games in the infinite scroll page, shows 50 at a time
+for x in range(0, total_results, 50):
+    all_games = get_all_games(f'https://store.steampowered.com/search/results/?query&start={x}&count=50&dynamic_data=&force_infinite=1&tags=122&supportedlang=english&filter=topsellers&ndl=1&snr=1_7_7_7000_7&infinite=1')
+    if(all_games != None): results.append(create_games_list(all_games[0])) #get_all_games returns tuple of list, int, just want list
+    print(x)
+
+games_to_csv(results)
 
 
