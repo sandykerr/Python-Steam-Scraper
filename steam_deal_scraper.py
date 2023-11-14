@@ -84,7 +84,7 @@ def create_csv_header():
     year = now.year
 
     #create header for csv with date and time, we will write this into our csv
-    csv_header = 'Game prices as of: ' + str(year) + '/' + str(month) + '/' + str(day) + ', at: ' + str(hrs) + ':' + str(mins) + ':' + str(secs) + '\n'
+    csv_header = 'Game prices as of: ' + str(year) + '/' + str(month) + '/' + str(day) + ', at ' + str(hrs) + ':' + str(mins) + ':' + str(secs) + '\n'
     return csv_header
 
 games_html = get_html(url2)
