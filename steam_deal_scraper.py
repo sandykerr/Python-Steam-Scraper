@@ -65,7 +65,7 @@ def games_to_csv(games_list):
     with open(filepath, 'a') as f:
         f.write(create_csv_header())
         f.close()
-    games_df.to_csv(filepath, index=False, header=False)
+    games_df.to_csv(filepath, index=False, header=False, mode='a')
     
     print('Saved games to CSV')
     return
